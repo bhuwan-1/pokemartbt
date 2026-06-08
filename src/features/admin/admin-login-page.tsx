@@ -13,6 +13,7 @@ export function AdminLoginPage() {
   const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -54,14 +55,28 @@ export function AdminLoginPage() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-on-surface-variant transition-colors hover:text-primary"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-pressed={showPassword}
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  {showPassword ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
+            </div>
           </div>
           {error && (
             <p className="flex items-center gap-1.5 text-body-sm text-error" role="alert">
