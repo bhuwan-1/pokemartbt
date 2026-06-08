@@ -26,8 +26,16 @@ export function HowToOrder() {
           <p className="text-label-bold uppercase text-primary">How it works</p>
           <h2 className="mt-2 text-headline-lg text-on-surface">Direct collector support</h2>
           <p className="mt-3 text-body-lg text-on-surface-variant">
-            Ordering is personal — we use WhatsApp so every collector gets high-res photos and safe
-            shipping updates.
+            Ordering is personal — we use{' '}
+            <a
+              href={buildWhatsappChatLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              WhatsApp
+            </a>{' '}
+            so every collector gets high-res photos and safe shipping updates.
           </p>
         </div>
 
@@ -46,17 +54,17 @@ export function HowToOrder() {
           ))}
         </div>
 
-        <div className="mt-12 flex justify-center">
+        {/* <div className="mt-12 flex justify-center">
           <a
             href={buildWhatsappChatLink()}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 rounded-full bg-whatsapp px-8 py-4 text-headline-md text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+            className="flex items-center gap-3 rounded-lg bg-whatsapp px-8 py-4 text-headline-md text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
           >
-            <span className="material-symbols-outlined">send</span>
+            <WhatsAppIcon className="size-6" />
             Start a chat on WhatsApp
           </a>
-        </div>
+        </div> */}
       </div>
     </section>
   )

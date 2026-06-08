@@ -58,7 +58,7 @@ export function Header({ onCartClick }: { onCartClick: () => void }) {
           <button
             type="button"
             onClick={onCartClick}
-            className="relative rounded-full p-2 text-foreground transition-colors hover:bg-surface-low hover:text-primary"
+            className="relative rounded-full p-2 text-foreground transition-colors  hover:text-primary"
             aria-label={`Open cart (${count} items)`}
           >
             <span className="material-symbols-outlined text-[28px]">shopping_cart</span>
@@ -71,7 +71,7 @@ export function Header({ onCartClick }: { onCartClick: () => void }) {
           {/* Admin login entry point (CLAUDE.md rule 4 deviation — intentional, per request). */}
           <Link
             to="/admin/login"
-            className="rounded-full p-2 text-foreground transition-colors hover:bg-surface-low hover:text-primary"
+            className="rounded-full p-2 text-foreground transition-colors hover:text-primary"
             aria-label="Admin login"
           >
             <span className="material-symbols-outlined text-[28px]">account_circle</span>

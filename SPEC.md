@@ -281,7 +281,7 @@ No barrel files. Filenames kebab-case.
 /admin/:id/edit         edit product     (guarded)
 ```
 
-`require-auth.tsx` wraps the guarded routes: reads session from `auth-context`; if none, redirect to `/admin/login`. The `/admin*` paths are **not** linked from the customer-facing nav.
+`require-auth.tsx` wraps the guarded routes: reads session from `auth-context`; if none, redirect to `/admin/login`. The **`/admin/login`** entry point is intentionally linked from the public UI via a header account icon and a footer "Admin Login" link _(owner decision, 2026-06-08)_; the guarded admin **management** paths (`/admin`, `/admin/new`, `/admin/:id/edit`) are never linked from customer-facing navigation. See CLAUDE.md rule 4.
 
 ## 10. Features
 
@@ -457,7 +457,7 @@ Never expose the service-role key. `.env` in `.gitignore`; commit `.env.example`
 - [ ] Admin can upload multiple images (PNG/JPG/WEBP ≤10MB), reorder them, set the cover, and remove individual images; removing deletes the storage object.
 - [ ] Deleting a product removes **all** its storage objects.
 - [ ] No service-role key anywhere in the client bundle.
-- [ ] Public-facing nav contains no link to `/admin*`.
+- [ ] Public-facing nav links only `/admin/login` (header account icon + footer link); admin **management** routes (`/admin`, `/admin/new`, `/admin/:id/edit`) are never linked. _(Revised 2026-06-08 — see CLAUDE.md rule 4.)_
 
 ## 15. Open Decisions
 

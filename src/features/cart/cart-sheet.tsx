@@ -7,6 +7,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
+import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { useCart } from '@/features/cart/use-cart'
 import { buildWhatsappLink } from '@/features/whatsapp/build-whatsapp-link'
 import { formatPrice } from '@/lib/utils'
@@ -103,9 +104,9 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                 href={buildWhatsappLink(items)}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center gap-2 rounded-full bg-whatsapp px-6 py-3 text-body-md font-bold text-white shadow-md transition-transform hover:scale-[1.02] active:translate-y-px"
+                className="flex items-center justify-center gap-2 rounded-lg bg-whatsapp px-6 py-3 text-body-md font-bold text-white shadow-md transition-transform hover:scale-[1.02] active:translate-y-px"
               >
-                <span className="material-symbols-outlined text-[20px]">send</span>
+                <WhatsAppIcon className="size-5" />
                 Order via WhatsApp
               </a>
               <Button variant="ghost" onClick={clearCart} className="text-on-surface-variant">

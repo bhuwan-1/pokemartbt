@@ -26,7 +26,7 @@ The Stitch export shipped a full ~60-token Material Design 3 palette. Use the **
 | `on-secondary`           | `#6f5700` | Text on gold                                                                 |
 | `whatsapp`               | `#25D366` | WhatsApp CTA **only**                                                        |
 | `background` / `surface` | `#f9f9ff` | Page background                                                              |
-| `surface-low`            | `#f0f3ff` | Search field, subtle fills                                                   |
+| `surface-low`            | `#f0f3ff` | Input fields, subtle fills                                                   |
 | `surface` (panel)        | `#e7eeff` | Section/hero background blocks                                               |
 | `surface-high`           | `#dee8ff` | Card backgrounds, raised blocks                                              |
 | `panel`                  | `#ffffff` | Form cards / content panels (white on the cool bg)                           |
@@ -60,7 +60,8 @@ Section markers (e.g. "PRODUCT CLASSIFICATION", "MEDIA ASSETS") are `label-bold`
 
 - **Base unit:** 8px. **Gutter:** 24px.
 - **Page margins:** 16px mobile / 40px desktop. **Max content width:** 1280px (centered).
-- **Radius scale:** `sm` 0.25rem (default), `lg` 0.5rem (inputs/buttons), `xl` 0.75rem (cards), `2xl` 1rem (form panels), `full` 9999px (pills, WhatsApp CTA). The big CTA block uses `2rem`.
+- **Full-bleed bands:** the landing hero and "How to Order" sections break out of the `max-w-7xl` page container to span the full viewport (`w-screen ml-[calc(50%-50vw)]`); their inner content stays constrained to the 1280px container. The hero sits flush under the fixed header. `overflow-x-clip` on the layout root prevents the `100vw` breakout from causing horizontal scroll.
+- **Radius scale:** `sm` 0.25rem (default), `lg` 0.5rem (inputs/buttons/**WhatsApp CTA**), `xl` 0.75rem (cards), `2xl` 1rem (form panels), `full` 9999px (badges, condition pills, type tabs). The big CTA block uses `2rem`.
 - **Forms:** two-column on desktop (≈2fr content / 1fr sidebar for media + metadata), single column on mobile. Panels are white `2xl` cards with a hairline `outline-variant` border at ~10% and a soft shadow.
 
 ## 5. Elevation & Signature Effects
@@ -116,7 +117,7 @@ Reusable as plain CSS utilities (carried over from the mockup — they're good):
 
 - **Primary:** red fill, white text, `lg` radius, soft shadow. Hover darkens to `primary-hover`.
 - **Secondary / outline:** 2px `outline` border, transparent fill, tinted hover.
-- **WhatsApp:** `#25D366` fill, white text, **`full` radius (pill)**, send icon, scale-on-hover. Reserved for the WhatsApp action.
+- **WhatsApp:** `#25D366` fill, white text, **`lg` radius (boxy — same shape as the primary button)**, the **WhatsApp brand logo** (inline SVG `WhatsAppIcon` in `src/components/`, not the `send` glyph), scale-on-hover. Reserved for the WhatsApp action. _(Updated 2026-06-08 — previously a `full`-radius pill with the `send` icon.)_
 - **Text/link:** `primary`, often with a trailing arrow icon that nudges right on hover.
 
 ### Badges / pills
@@ -127,9 +128,9 @@ Rounded-`full`, `label-bold` uppercase. Variants: red (`primary-container` bg / 
 
 `xl` radius, `surface-high` bg, `holo-sweep` + `card-lift`. Cover image `object-cover`; dark gradient overlay (`from-black/80`) when text sits on the image. Title `headline-md`, price `price-display`.
 
-### Bento grid (featured collections)
+### Featured Collections (showcase)
 
-Asymmetric grid: one large 2×2 hero tile + medium + small tiles. Each tile is a `holo-sweep`/`card-lift` card with an image and bottom-anchored label.
+Driven by `is_featured` products. **Text never overlays the card art** — Pokémon images are busy full-bleed artwork, so all metadata sits on solid `panel` surfaces. Each card's art is shown **contained** (`object-contain`, never cropped) on a lit **pedestal** (`bg-gradient-to-b from-surface-low to-surface-high`) with a `drop-shadow-xl` lift + the `holo-sweep` effect — like a slab on display. Layout: an editorial **split-panel hero** for the first item (pedestal + info column: gold/red "Featured pick" marker, name, set, badge, `price-display` red price, "View card →"), then a **slab grid** (2-up mobile / 4-up desktop) for the rest — white `card-lift` cards with the pedestal on top and name (2-line clamp) · set · badge · price below. _(Redesigned 2026-06-08 — replaced the text-on-image bento, which was unreadable over busy card art.)_
 
 ### Form components (from the "Create New Product" mockup)
 
@@ -145,8 +146,12 @@ Asymmetric grid: one large 2×2 hero tile + medium + small tiles. Each tile is a
 
 ### Navigation
 
-- **Top nav (desktop):** logo (`headline-md`, black/`primary`, tight tracking) + text links (active link has a 2px red underline) + a pill-shaped search field + cart and account icons.
-- **Mobile bottom nav:** fixed, `rounded-t-xl`, top shadow, 4 destinations with Material icons + `label-bold` labels; active item is a `primary-container` pill. (Per SPEC, the customer build should **not** expose an Admin destination here.)
+- **Top nav (desktop):** logo (`headline-md`, **Montserrat black 900, all-`primary` red, `tracking-tighter`** — single heavy wordmark) + text links (active link has a 2px red underline) + cart icon + **account icon linking to `/admin/login`**. **No search field.** _(Updated 2026-06-08 — logo unified to all-red heavy; search dropped; account icon now the admin entry point, see CLAUDE.md rule 4.)_
+- **Mobile bottom nav:** fixed, `rounded-t-xl`, top shadow, **5 slots: Home, Shop, Singles, Sealed, Cart** with Material icons + `label-bold` labels; active item is a `primary-container` pill. **No Admin destination here** (admin login lives in the header account icon + footer link instead).
+
+### Footer
+
+Full-bleed **dark band** — background set by a single `FOOTER_BG` constant in `footer.tsx` (default `#0a0a0a`; any CSS color), light text tuned for dark. Four columns: brand wordmark + blurb · **Shop** (Catalog / Singles / Sealed) · **Support** (WhatsApp Contact, Admin Login) · **Get in touch** (boxy WhatsApp CTA). **No newsletter** (§11). Hairline divider, then a centered trademark/copyright line.
 
 ## 7. Imagery
 
