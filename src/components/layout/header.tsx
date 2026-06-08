@@ -1,4 +1,4 @@
-import { Link, useLocation, useSearchParams } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { STORE_NAME } from '@/lib/config'
 import { cn } from '@/lib/utils'
 import { useCart } from '@/features/cart/use-cart'
@@ -6,26 +6,16 @@ import { useCart } from '@/features/cart/use-cart'
 const NAV_LINKS = [
   { label: 'Home', to: '/', match: 'home' },
   { label: 'Catalog', to: '/catalog', match: 'catalog' },
-  { label: 'Singles', to: '/catalog?type=single', match: 'single' },
-  { label: 'Sealed', to: '/catalog?type=sealed', match: 'sealed' },
 ] as const
 
 export function Header({ onCartClick }: { onCartClick: () => void }) {
   const { count } = useCart()
   const location = useLocation()
-  const [searchParams] = useSearchParams()
-  const onCatalog = location.pathname === '/catalog'
-  const catalogType = onCatalog ? searchParams.get('type') : null
-  const active: (typeof NAV_LINKS)[number]['match'] =
-    location.pathname === '/'
+  const active: (typeof NAV_LINKS)[number]['match'] | '' = location.pathname.startsWith('/catalog')
+    ? 'catalog'
+    : location.pathname === '/'
       ? 'home'
-      : onCatalog && catalogType === 'single'
-        ? 'single'
-        : onCatalog && catalogType === 'sealed'
-          ? 'sealed'
-          : onCatalog
-            ? 'catalog'
-            : 'home'
+      : ''
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 h-20 border-b border-border bg-background/95 backdrop-blur-md">

@@ -1,8 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { productRowsSchema } from '@/types/product'
 
 export type CatalogSort = 'newest' | 'price-asc' | 'price-desc'
+
+export const CATALOG_PAGE_SIZE = 10
 
 export type CatalogFilters = {
   type?: 'single' | 'sealed'
@@ -14,10 +16,11 @@ export type CatalogFilters = {
   sort: CatalogSort
 }
 
-async function fetchProducts(filters: CatalogFilters) {
+// `page` is 0-indexed (TanStack infinite-query page param).
+async function fetchProducts(filters: CatalogFilters, page: number) {
   // RLS already restricts anon to active rows; filtering here keeps admin sessions
   // (authenticated can read inactive) consistent with the public catalog.
-  let query = supabase.from('products').select('*').eq('is_active', true)
+  let query = supabase.from('products').select('*', { count: 'exact' }).eq('is_active', true)
 
   if (filters.type) query = query.eq('product_type', filters.type)
   if (filters.set) query = query.eq('set_name', filters.set)
@@ -37,15 +40,23 @@ async function fetchProducts(filters: CatalogFilters) {
       query = query.order('created_at', { ascending: false })
   }
 
-  const { data, error } = await query
+  const from = page * CATALOG_PAGE_SIZE
+  query = query.range(from, from + CATALOG_PAGE_SIZE - 1)
+
+  const { data, error, count } = await query
   if (error) throw error
-  return productRowsSchema.parse(data)
+  return { items: productRowsSchema.parse(data), count: count ?? 0 }
 }
 
 export function useProducts(filters: CatalogFilters) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['products', filters],
-    queryFn: () => fetchProducts(filters),
+    queryFn: ({ pageParam }) => fetchProducts(filters, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((sum, p) => sum + p.items.length, 0)
+      return loaded < lastPage.count ? allPages.length : undefined
+    },
   })
 }
 

@@ -146,8 +146,8 @@ Driven by `is_featured` products. **Text never overlays the card art** — Poké
 
 ### Navigation
 
-- **Top nav (desktop):** logo (`headline-md`, **Montserrat black 900, all-`primary` red, `tracking-tighter`** — single heavy wordmark) + text links (active link has a 2px red underline) + cart icon + **account icon linking to `/admin/login`**. **No search field.** _(Updated 2026-06-08 — logo unified to all-red heavy; search dropped; account icon now the admin entry point, see CLAUDE.md rule 4.)_
-- **Mobile bottom nav:** fixed, `rounded-t-xl`, top shadow, **5 slots: Home, Shop, Singles, Sealed, Cart** with Material icons + `label-bold` labels; active item is a `primary-container` pill. **No Admin destination here** (admin login lives in the header account icon + footer link instead).
+- **Top nav (desktop):** logo (`headline-md`, **Montserrat black 900, all-`primary` red, `tracking-tighter`** — single heavy wordmark) + text links **Home · Catalog** (active link has a 2px red underline) + cart icon + **account icon linking to `/admin/login`**. **No search field.** _(Updated 2026-06-08 — logo unified to all-red heavy; search dropped; account icon = admin entry point per CLAUDE.md rule 4; Singles/Sealed links removed — type filtering lives on the catalog page.)_
+- **Mobile bottom nav:** fixed, `rounded-t-xl`, top shadow, **3 slots: Home, Shop, Cart** with Material icons + `label-bold` labels; active item is a `primary-container` pill. **No Admin destination here** (admin login lives in the header account icon + footer link instead).
 
 ### Footer
 

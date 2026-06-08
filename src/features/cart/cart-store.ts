@@ -12,9 +12,12 @@ export type CartItem = {
   price: number
   currency: string
   qty: number
+  maxQty: number // available stock at add time; cart qty is capped to this
+  image: string | null // cover storage path (image_paths[0]); URL derived at render
 }
 
-const STORAGE_KEY = 'pokemartbt.cart.v1'
+// v2: added maxQty (stock cap) + image (cover path) to CartItem; bump clears stale v1 carts.
+const STORAGE_KEY = 'pokemartbt.cart.v2'
 
 type Listener = () => void
 
@@ -58,7 +61,9 @@ export function addToCart(product: ProductRow, qty = 1) {
   if (existing) {
     commit(
       snapshot.map((i) =>
-        i.id === product.id ? { ...i, qty: Math.min(i.qty + qty, product.quantity) } : i,
+        i.id === product.id
+          ? { ...i, qty: Math.min(i.qty + qty, product.quantity), maxQty: product.quantity }
+          : i,
       ),
     )
     return
@@ -73,7 +78,9 @@ export function addToCart(product: ProductRow, qty = 1) {
       grade: product.grade,
       price: product.price,
       currency: product.currency,
-      qty: Math.min(qty, Math.max(product.quantity, 1)),
+      qty: Math.min(qty, product.quantity),
+      maxQty: product.quantity,
+      image: product.image_paths[0] ?? null,
     },
   ])
 }
@@ -87,7 +94,8 @@ export function setCartQty(id: string, qty: number) {
     removeFromCart(id)
     return
   }
-  commit(snapshot.map((i) => (i.id === id ? { ...i, qty } : i)))
+  // Never exceed available stock (maxQty); `?? qty` keeps any pre-existing items safe.
+  commit(snapshot.map((i) => (i.id === id ? { ...i, qty: Math.min(qty, i.maxQty ?? qty) } : i)))
 }
 
 export function clearCart() {

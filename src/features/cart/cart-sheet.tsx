@@ -6,10 +6,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { WhatsAppIcon } from '@/components/whatsapp-icon'
 import { useCart } from '@/features/cart/use-cart'
 import { buildWhatsappLink } from '@/features/whatsapp/build-whatsapp-link'
+import { getPublicImageUrl } from '@/lib/supabase'
 import { formatPrice } from '@/lib/utils'
 
 type CartSheetProps = {
@@ -45,51 +47,81 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
               {items.map((item) => (
                 <li
                   key={item.id}
-                  className="rounded-xl border border-border bg-panel p-3 shadow-sm"
+                  className="flex gap-3 rounded-xl border border-border bg-panel p-3 shadow-sm"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-body-md font-bold text-foreground">{item.name}</p>
-                      <p className="text-body-sm text-on-surface-variant">
-                        {[item.set_name, item.condition, item.grade ? `Grade ${item.grade}` : null]
-                          .filter(Boolean)
-                          .join(' · ')}
+                  <div className="aspect-[5/7] w-12 shrink-0 overflow-hidden rounded-md bg-surface-low">
+                    {item.image ? (
+                      <img
+                        src={getPublicImageUrl(item.image)}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <span className="material-symbols-outlined text-[18px] text-on-surface-variant/40">
+                          playing_cards
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-body-md font-bold text-foreground">{item.name}</p>
+                        <p className="text-body-sm text-on-surface-variant">
+                          {[
+                            item.set_name,
+                            item.condition,
+                            item.grade ? `Grade ${item.grade}` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-on-surface-variant transition-colors hover:text-error"
+                        aria-label={`Remove ${item.name}`}
+                      >
+                        <span className="material-symbols-outlined text-[20px]">delete</span>
+                      </button>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="size-7"
+                          onClick={() => setCartQty(item.id, item.qty - 1)}
+                          aria-label="Decrease quantity"
+                        >
+                          −
+                        </Button>
+                        <span className="w-6 text-center text-body-md font-bold">{item.qty}</span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="size-7"
+                          onClick={() => {
+                            if (item.qty >= item.maxQty) {
+                              toast.warning(`Only ${item.maxQty} in stock`, {
+                                description: `That's the most you can order of ${item.name} right now.`,
+                              })
+                              return
+                            }
+                            setCartQty(item.id, item.qty + 1)
+                          }}
+                          aria-label="Increase quantity"
+                        >
+                          +
+                        </Button>
+                      </div>
+                      <p className="text-body-md font-extrabold text-foreground">
+                        {formatPrice(item.price * item.qty, item.currency)}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-on-surface-variant transition-colors hover:text-error"
-                      aria-label={`Remove ${item.name}`}
-                    >
-                      <span className="material-symbols-outlined text-[20px]">delete</span>
-                    </button>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="size-7"
-                        onClick={() => setCartQty(item.id, item.qty - 1)}
-                        aria-label="Decrease quantity"
-                      >
-                        −
-                      </Button>
-                      <span className="w-6 text-center text-body-md font-bold">{item.qty}</span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="size-7"
-                        onClick={() => setCartQty(item.id, item.qty + 1)}
-                        aria-label="Increase quantity"
-                      >
-                        +
-                      </Button>
-                    </div>
-                    <p className="text-body-md font-extrabold text-foreground">
-                      {formatPrice(item.price * item.qty, item.currency)}
-                    </p>
                   </div>
                 </li>
               ))}

@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { PaginationControls } from '@/components/pagination-controls'
 import {
   Dialog,
   DialogContent,
@@ -16,19 +17,32 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { getPublicImageUrl } from '@/lib/supabase'
 import { formatPrice } from '@/lib/utils'
-import { useAdminProducts } from '@/features/admin/hooks/use-admin-products'
+import { ADMIN_PAGE_SIZE, useAdminProducts } from '@/features/admin/hooks/use-admin-products'
 import { useProductMutations } from '@/features/admin/hooks/use-product-mutations'
 import type { ProductRow } from '@/types/product'
 
 export function InventoryPage() {
-  const { data: products, isPending } = useAdminProducts()
+  const [page, setPage] = useState(1)
+  const { data, isPending } = useAdminProducts(page)
   const { patchProduct, deleteProduct } = useProductMutations()
   const [pendingDelete, setPendingDelete] = useState<ProductRow | null>(null)
+
+  const products = data?.items
+  const pageCount = data ? Math.ceil(data.count / ADMIN_PAGE_SIZE) : 0
+
+  const goToPage = (next: number) => {
+    setPage(next)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const confirmDelete = () => {
     if (!pendingDelete) return
     deleteProduct.mutate(pendingDelete, {
-      onSuccess: () => toast.success('Product deleted (images included)'),
+      onSuccess: () => {
+        toast.success('Product deleted (images included)')
+        // If that was the only row on this page, step back so we don't land on an empty page.
+        if (products && products.length === 1 && page > 1) setPage(page - 1)
+      },
       onError: (e) => toast.error('Delete failed', { description: e.message }),
       onSettled: () => setPendingDelete(null),
     })
@@ -185,6 +199,10 @@ export function InventoryPage() {
             </li>
           ))}
         </ul>
+      )}
+
+      {!isPending && (
+        <PaginationControls page={page} pageCount={pageCount} onPageChange={goToPage} />
       )}
 
       <Dialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
