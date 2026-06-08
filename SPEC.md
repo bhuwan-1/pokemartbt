@@ -221,6 +221,9 @@ src/
   components/
     ui/                           # shadcn primitives
     layout/                       # header, footer, mobile-nav
+    error-boundary.tsx            # app-level React class boundary (wraps RouterProvider)
+    error-page.tsx                # router errorElement (route/render errors + 404)
+    error-screen.tsx              # shared full-screen fallback + "Back to home"
   features/
     home/
       home-page.tsx                # landing: hero + featured + how-to-order + CTA
@@ -282,6 +285,8 @@ No barrel files. Filenames kebab-case.
 ```
 
 `require-auth.tsx` wraps the guarded routes: reads session from `auth-context`; if none, redirect to `/admin/login`. The **`/admin/login`** entry point is intentionally linked from the public UI via a header account icon and a footer "Admin Login" link _(owner decision, 2026-06-08)_; the guarded admin **management** paths (`/admin`, `/admin/new`, `/admin/:id/edit`) are never linked from customer-facing navigation. See CLAUDE.md rule 4.
+
+**Error handling:** a pathless root route carries an `errorElement` (`error-page.tsx`) that catches route/render/loader errors and unmatched routes (404), rendering a full-screen fallback with a "Back to home" action. An app-level React class `ErrorBoundary` wraps `RouterProvider` as a final safety net. Both share `error-screen.tsx`. _(Added 2026-06-08.)_
 
 ## 10. Features
 

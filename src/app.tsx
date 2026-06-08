@@ -12,27 +12,35 @@ import { AdminLoginPage } from '@/features/admin/admin-login-page'
 import { InventoryPage } from '@/features/admin/inventory-page'
 import { ProductFormPage } from '@/features/admin/product-form'
 import { Toaster } from '@/components/ui/sonner'
+import { ErrorBoundary } from '@/components/error-boundary'
+import { ErrorPage } from '@/components/error-page'
 
 const router = createBrowserRouter([
   {
-    element: <PublicLayout />,
-    children: [
-      { path: '/', element: <HomePage /> },
-      { path: '/catalog', element: <CatalogPage /> },
-      { path: '/card/:id', element: <ProductDetailPage /> },
-    ],
-  },
-  // /admin* is intentionally unlinked from the public UI (CLAUDE.md rule 4).
-  { path: '/admin/login', element: <AdminLoginPage /> },
-  {
-    element: <RequireAuth />,
+    // Pathless root: its errorElement catches route/render errors and 404s app-wide.
+    errorElement: <ErrorPage />,
     children: [
       {
-        element: <AdminLayout />,
+        element: <PublicLayout />,
         children: [
-          { path: '/admin', element: <InventoryPage /> },
-          { path: '/admin/new', element: <ProductFormPage /> },
-          { path: '/admin/:id/edit', element: <ProductFormPage /> },
+          { path: '/', element: <HomePage /> },
+          { path: '/catalog', element: <CatalogPage /> },
+          { path: '/card/:id', element: <ProductDetailPage /> },
+        ],
+      },
+      // /admin* is intentionally unlinked from the public UI (CLAUDE.md rule 4).
+      { path: '/admin/login', element: <AdminLoginPage /> },
+      {
+        element: <RequireAuth />,
+        children: [
+          {
+            element: <AdminLayout />,
+            children: [
+              { path: '/admin', element: <InventoryPage /> },
+              { path: '/admin/new', element: <ProductFormPage /> },
+              { path: '/admin/:id/edit', element: <ProductFormPage /> },
+            ],
+          },
         ],
       },
     ],
@@ -43,7 +51,9 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <ErrorBoundary>
+          <RouterProvider router={router} />
+        </ErrorBoundary>
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
