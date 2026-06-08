@@ -152,6 +152,23 @@ export function InventoryPage() {
                 />
               </div>
 
+              <div className="flex items-center gap-1.5">
+                <span className="text-body-sm text-on-surface-variant">Featured</span>
+                <Switch
+                  checked={p.is_featured}
+                  onCheckedChange={(checked) =>
+                    patchProduct.mutate(
+                      { id: p.id, patch: { is_featured: checked } },
+                      {
+                        onError: (err) =>
+                          toast.error('Update failed', { description: err.message }),
+                      },
+                    )
+                  }
+                  aria-label={`Toggle featured for ${p.name}`}
+                />
+              </div>
+
               <div className="flex items-center gap-1">
                 <Button asChild variant="outline" size="sm">
                   <Link to={`/admin/${p.id}/edit`}>Edit</Link>

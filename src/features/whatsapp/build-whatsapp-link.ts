@@ -38,3 +38,9 @@ export function buildWhatsappLink(lines: CartLine[]): string {
   const message = buildWhatsappMessage(lines)
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
 }
+
+/** Generic "start a chat" link (no cart) — used by home-page CTAs. */
+export function buildWhatsappChatLink(message?: string): string {
+  const text = message ?? `Hi! I'd like to ask about products at ${STORE_NAME}.`
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`
+}

@@ -9,7 +9,7 @@ export function PublicLayout() {
   const [cartOpen, setCartOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col overflow-x-clip">
       <Header onCartClick={() => setCartOpen(true)} />
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-24 pb-24 md:px-10 md:pb-12">
         <Outlet />

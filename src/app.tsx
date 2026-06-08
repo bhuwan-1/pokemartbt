@@ -5,6 +5,7 @@ import { AuthProvider } from '@/features/auth/auth-context'
 import { RequireAuth } from '@/features/auth/require-auth'
 import { PublicLayout } from '@/components/layout/public-layout'
 import { AdminLayout } from '@/components/layout/admin-layout'
+import { HomePage } from '@/features/home/home-page'
 import { CatalogPage } from '@/features/catalog/catalog-page'
 import { ProductDetailPage } from '@/features/catalog/product-detail-page'
 import { AdminLoginPage } from '@/features/admin/admin-login-page'
@@ -16,7 +17,8 @@ const router = createBrowserRouter([
   {
     element: <PublicLayout />,
     children: [
-      { path: '/', element: <CatalogPage /> },
+      { path: '/', element: <HomePage /> },
+      { path: '/catalog', element: <CatalogPage /> },
       { path: '/card/:id', element: <ProductDetailPage /> },
     ],
   },

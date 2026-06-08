@@ -13,6 +13,7 @@ type ProductPayload = {
   currency: string
   quantity: number
   is_active: boolean
+  is_featured: boolean
   description: string | null
   image_paths: string[]
   condition: string
@@ -35,6 +36,7 @@ export function toProductPayload(input: ProductInput, imagePaths: string[]): Pro
     currency: input.currency,
     quantity: input.quantity,
     is_active: input.is_active,
+    is_featured: input.is_featured,
     description: input.description || null,
     image_paths: imagePaths,
   }
@@ -102,7 +104,7 @@ export function useProductMutations() {
   const patchProduct = useMutation({
     mutationFn: async (vars: {
       id: string
-      patch: Partial<Pick<ProductRow, 'is_active' | 'quantity'>>
+      patch: Partial<Pick<ProductRow, 'is_active' | 'quantity' | 'is_featured'>>
     }) => {
       const { error } = await supabase.from('products').update(vars.patch).eq('id', vars.id)
       if (error) throw error

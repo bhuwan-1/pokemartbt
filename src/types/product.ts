@@ -18,6 +18,7 @@ export const productRowSchema = z.object({
   currency: z.string(),
   quantity: z.number().int(),
   is_active: z.boolean(),
+  is_featured: z.boolean(),
   image_paths: z.array(z.string()),
   description: z.string().nullable(),
   created_at: z.string(),

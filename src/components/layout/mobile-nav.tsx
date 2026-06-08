@@ -3,9 +3,10 @@ import { cn } from '@/lib/utils'
 import { useCart } from '@/features/cart/use-cart'
 
 const ITEMS = [
-  { label: 'Home', icon: 'home', to: '/', type: null },
-  { label: 'Singles', icon: 'playing_cards', to: '/?type=single', type: 'single' },
-  { label: 'Sealed', icon: 'package_2', to: '/?type=sealed', type: 'sealed' },
+  { label: 'Home', icon: 'home', to: '/', match: 'home' },
+  { label: 'Shop', icon: 'storefront', to: '/catalog', match: 'catalog' },
+  { label: 'Singles', icon: 'playing_cards', to: '/catalog?type=single', match: 'single' },
+  { label: 'Sealed', icon: 'package_2', to: '/catalog?type=sealed', match: 'sealed' },
 ] as const
 
 // Customer-facing nav only — no Admin destination here (CLAUDE.md rule 4).
@@ -13,13 +14,24 @@ export function MobileNav({ onCartClick }: { onCartClick: () => void }) {
   const { count } = useCart()
   const location = useLocation()
   const [searchParams] = useSearchParams()
-  const activeType = location.pathname === '/' ? searchParams.get('type') : undefined
+  const onCatalog = location.pathname === '/catalog'
+  const catalogType = onCatalog ? searchParams.get('type') : null
+  const active =
+    location.pathname === '/'
+      ? 'home'
+      : onCatalog && catalogType === 'single'
+        ? 'single'
+        : onCatalog && catalogType === 'sealed'
+          ? 'sealed'
+          : onCatalog
+            ? 'catalog'
+            : 'home'
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 rounded-t-xl border-t border-border bg-background/95 shadow-[0_-4px_12px_rgb(0_0_0/0.06)] backdrop-blur-md md:hidden">
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-5">
         {ITEMS.map((item) => {
-          const isActive = activeType === item.type
+          const isActive = active === item.match
           return (
             <Link key={item.label} to={item.to} className="flex flex-col items-center gap-1 py-2.5">
               <span

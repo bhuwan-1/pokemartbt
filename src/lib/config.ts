@@ -1,6 +1,6 @@
 // Single source for store identity & env-driven config.
 // Branding is undecided (trademark review pending) — never hardcode the name elsewhere.
-export const STORE_NAME = 'PokeMart BT'
+export const STORE_NAME = 'PokéMart BT'
 
 export const WHATSAPP_NUMBER: string = import.meta.env.VITE_WHATSAPP_NUMBER ?? ''
 

@@ -80,6 +80,7 @@ Single table `products`. A `product_type` discriminator distinguishes individual
 | `currency`        | text, not null, default `'USD'`  | store-wide; see Open Decisions                                        |
 | `quantity`        | int, not null, default `1`       | `>= 0`; singles usually 1, sealed often >1                            |
 | `is_active`       | bool, not null, default `true`   | master visibility switch                                              |
+| `is_featured`     | bool, not null, default `false`  | surfaced in the home-page Featured Collections bento (migration 0002) |
 | `image_paths`     | text[], not null, default `'{}'` | ordered storage object paths; **index 0 = cover**                     |
 | `description`     | text                             | freeform notes                                                        |
 | `created_at`      | timestamptz, not null            | `now()`                                                               |
@@ -221,6 +222,13 @@ src/
     ui/                           # shadcn primitives
     layout/                       # header, footer, mobile-nav
   features/
+    home/
+      home-page.tsx                # landing: hero + featured + how-to-order + CTA
+      components/
+        hero.tsx
+        featured-collections.tsx   # bento grid of is_featured products
+        how-to-order.tsx
+        home-cta.tsx
     catalog/
       catalog-page.tsx
       product-detail-page.tsx
@@ -231,6 +239,7 @@ src/
       hooks/
         use-products.ts            # list query
         use-product.ts             # detail query
+        use-featured-products.ts   # active + is_featured, for the home bento
     cart/
       cart-store.ts                # localStorage-backed
       use-cart.ts
@@ -263,7 +272,8 @@ No barrel files. Filenames kebab-case.
 ## 9. Routing
 
 ```
-/                       catalog (public)
+/                       home / landing (public) — hero, featured collections, how-to-order, CTA
+/catalog                catalog with filters + sort (public)
 /card/:id               product detail (public)
 /admin/login            admin login (public; redirects to /admin if already authed)
 /admin                  inventory list   (guarded)

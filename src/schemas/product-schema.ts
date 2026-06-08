@@ -12,6 +12,7 @@ const baseFields = {
   currency: z.string().default(STORE_CURRENCY),
   quantity: z.coerce.number().int().nonnegative().default(1),
   is_active: z.boolean().default(true),
+  is_featured: z.boolean().default(false),
   description: z.string().trim().optional().nullable(),
 }
 

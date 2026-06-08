@@ -59,7 +59,7 @@ export function ProductDetailPage() {
           It may have been sold or removed.
         </p>
         <Button asChild className="mt-4">
-          <Link to="/">Back to catalog</Link>
+          <Link to="/catalog">Back to catalog</Link>
         </Button>
       </div>
     )

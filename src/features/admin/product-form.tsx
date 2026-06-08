@@ -45,6 +45,7 @@ const CREATE_DEFAULTS: ProductFormValues = {
   currency: STORE_CURRENCY,
   quantity: 1,
   is_active: true,
+  is_featured: false,
   description: '',
   card_number: '',
   rarity: '',
@@ -64,6 +65,7 @@ function rowToFormValues(row: ProductRow): ProductFormValues {
     currency: row.currency,
     quantity: row.quantity,
     is_active: row.is_active,
+    is_featured: row.is_featured,
     description: row.description ?? '',
     card_number: row.card_number ?? '',
     rarity: row.rarity ?? '',
@@ -126,6 +128,7 @@ export function ProductFormPage() {
   const isGraded = watch('is_graded')
   const gradingCompany = watch('grading_company')
   const isActive = watch('is_active')
+  const isFeatured = watch('is_featured')
   const isSingle = productType === 'single'
   const saving = createProduct.isPending || updateProduct.isPending
 
@@ -343,6 +346,19 @@ export function ProductFormPage() {
                 onCheckedChange={(checked) => setValue('is_active', checked)}
               />
               <Label htmlFor="is_active">Visible in store</Label>
+            </div>
+            <div className="space-y-1.5 pt-1">
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="is_featured"
+                  checked={!!isFeatured}
+                  onCheckedChange={(checked) => setValue('is_featured', checked)}
+                />
+                <Label htmlFor="is_featured">Feature on home page</Label>
+              </div>
+              <p className="text-body-sm text-on-surface-variant">
+                Shows this product in the Featured Collections grid on the home page.
+              </p>
             </div>
           </Panel>
         </div>
