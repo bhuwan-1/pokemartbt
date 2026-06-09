@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { STORE_CURRENCY } from '@/lib/config'
 
 const conditionSingle = z.enum(['NM', 'LP', 'MP', 'HP', 'DMG'])
-const gradingCompany = z.enum(['PSA', 'CGC', 'BGS', 'SGC'])
+const gradingCompany = z.enum(['PSA', 'CGC', 'BGS', 'SGC', 'TAG'])
 
 const baseFields = {
   name: z.string().min(1, 'Title is required'),
