@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { PaginationControls } from '@/components/pagination-controls'
 import {
   Dialog,
@@ -13,17 +14,89 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { getPublicImageUrl } from '@/lib/supabase'
-import { formatPrice } from '@/lib/utils'
-import { ADMIN_PAGE_SIZE, useAdminProducts } from '@/features/admin/hooks/use-admin-products'
+import { cn, formatPrice } from '@/lib/utils'
+import {
+  ADMIN_PAGE_SIZE,
+  useAdminProducts,
+  useAdminProductSets,
+  type AdminFilters,
+} from '@/features/admin/hooks/use-admin-products'
 import { useProductMutations } from '@/features/admin/hooks/use-product-mutations'
 import type { ProductRow } from '@/types/product'
 
+const TYPE_TABS = [
+  { label: 'All', value: null },
+  { label: 'Cards', value: 'single' },
+  { label: 'Sealed', value: 'sealed' },
+] as const
+
+const ALL = '__all__'
+
 export function InventoryPage() {
   const [page, setPage] = useState(1)
-  const { data, isPending } = useAdminProducts(page)
+
+  // Filter state. `searchInput` is the raw field value; `search` is its debounced commit.
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
+  const [type, setType] = useState<'single' | 'sealed' | null>(null)
+  const [set, setSet] = useState<string | null>(null)
+  const [featured, setFeatured] = useState(false)
+
+  // Debounce the search field, committing to `search`. Any filter change invalidates
+  // the current page index, so each setter also steps back to page 1.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setSearch(searchInput.trim())
+      setPage(1)
+    }, 300)
+    return () => clearTimeout(t)
+  }, [searchInput])
+
+  const filters = useMemo<AdminFilters>(
+    () => ({
+      search: search || undefined,
+      type: type ?? undefined,
+      set: set ?? undefined,
+      featured: featured || undefined,
+    }),
+    [search, type, set, featured],
+  )
+
+  const onType = (v: 'single' | 'sealed' | null) => {
+    setType(v)
+    setPage(1)
+  }
+  const onSet = (v: string) => {
+    setSet(v === ALL ? null : v)
+    setPage(1)
+  }
+  const onFeatured = (v: boolean) => {
+    setFeatured(v)
+    setPage(1)
+  }
+
+  const hasFilters = !!(search || type || set || featured)
+  const clearFilters = () => {
+    setSearchInput('')
+    setSearch('')
+    setType(null)
+    setSet(null)
+    setFeatured(false)
+    setPage(1)
+  }
+
+  const { data, isPending } = useAdminProducts(page, filters)
+  const { data: sets } = useAdminProductSets()
   const { patchProduct, deleteProduct } = useProductMutations()
   const [pendingDelete, setPendingDelete] = useState<ProductRow | null>(null)
 
@@ -63,6 +136,71 @@ export function InventoryPage() {
         </Button>
       </div>
 
+      <div className="flex flex-wrap items-end gap-3 border-b border-border/60 pb-4">
+        <div className="relative min-w-[14rem] flex-1">
+          <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-on-surface-variant">
+            search
+          </span>
+          <Input
+            className="pl-10"
+            placeholder="Search name or card number…"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            aria-label="Search products"
+          />
+        </div>
+
+        <div className="flex gap-2">
+          {TYPE_TABS.map((tab) => {
+            const isActive = type === tab.value
+            return (
+              <button
+                key={tab.label}
+                type="button"
+                onClick={() => onType(tab.value)}
+                className={cn(
+                  'rounded-full px-3 py-1.5 text-[12px] font-bold uppercase tracking-wide transition-colors',
+                  isActive
+                    ? 'bg-primary text-on-primary'
+                    : 'border border-outline/40 text-on-surface-variant hover:border-primary hover:text-primary',
+                )}
+              >
+                {tab.label}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="space-y-1">
+          <Select value={set ?? ALL} onValueChange={onSet}>
+            <SelectTrigger className="w-44" aria-label="Filter by set">
+              <SelectValue placeholder="All sets" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>All sets</SelectItem>
+              {(sets ?? []).map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-2 pb-2">
+          <Switch id="featured-only" checked={featured} onCheckedChange={onFeatured} />
+          <Label htmlFor="featured-only" className="text-body-sm text-on-surface-variant">
+            Featured only
+          </Label>
+        </div>
+
+        {hasFilters && (
+          <Button variant="ghost" size="sm" className="pb-2" onClick={clearFilters}>
+            Clear
+          </Button>
+        )}
+      </div>
+
       {isPending ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }, (_, i) => (
@@ -71,10 +209,27 @@ export function InventoryPage() {
         </div>
       ) : !products || products.length === 0 ? (
         <div className="rounded-2xl border border-border bg-panel p-10 text-center">
-          <p className="text-body-md font-bold text-foreground">No products yet</p>
-          <p className="text-body-sm text-on-surface-variant">
-            Create your first product to populate the catalog.
-          </p>
+          {hasFilters ? (
+            <>
+              <p className="text-body-md font-bold text-foreground">
+                No products match your filters
+              </p>
+              <p className="text-body-sm text-on-surface-variant">
+                Try a different search or{' '}
+                <button type="button" onClick={clearFilters} className="text-primary underline">
+                  clear the filters
+                </button>
+                .
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-body-md font-bold text-foreground">No products yet</p>
+              <p className="text-body-sm text-on-surface-variant">
+                Create your first product to populate the catalog.
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <ul className="space-y-3">

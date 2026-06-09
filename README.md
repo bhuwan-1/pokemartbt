@@ -1,73 +1,60 @@
-# React + TypeScript + Vite
+# pokemartbt
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A single-seller **Pokémon card storefront**. Visitors browse a public, no-login catalog of individual cards and sealed sets, build a cart, and complete their order by opening a pre-filled **WhatsApp** chat with the seller. A single admin logs in to manage inventory.
 
-Currently, two official plugins are available:
+There is **no payment, order, or shipping logic in the app** — the transaction is negotiated in WhatsApp. The client talks directly to Supabase; there is no custom backend.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- **Public catalog** — mobile-first browse with search, filtering (type, set, condition, price, graded), and sorting. No auth required.
+- **Cart → WhatsApp handoff** — the cart lives in `localStorage`; "Order via WhatsApp" opens `wa.me` with a readable pre-filled message. No checkout, no server-persisted cart.
+- **Admin inventory manager** — authenticated CRUD over products: multi-image upload, single-card vs sealed-set classification, graded-card fields, and quick toggles for active/featured status.
+- **Security by RLS** — Supabase Row-Level Security is the real access control. `anon` can read active rows only; all writes require an authenticated session. The route guard is cosmetic.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech stack
 
-## Expanding the ESLint configuration
+- **Build:** Vite + React + TypeScript
+- **Routing:** React Router v7
+- **Server state:** TanStack Query
+- **Forms / validation:** React Hook Form + Zod
+- **UI:** Tailwind CSS + shadcn/ui
+- **Backend:** Supabase — Postgres (data, RLS), Storage (images), Auth (admin only)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+cp .env.example .env   # fill in the values below
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Environment variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Variable                 | Purpose                                            |
+| ------------------------ | -------------------------------------------------- |
+| `VITE_SUPABASE_URL`      | Supabase project URL                               |
+| `VITE_SUPABASE_ANON_KEY` | Supabase **anon** key (never the service-role key) |
+| `VITE_WHATSAPP_NUMBER`   | Seller's WhatsApp number, intl format, digits only |
+| `VITE_STORE_CURRENCY`    | ISO display currency (e.g. `BTN`)                  |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+> The anon key ships in the client bundle **by design** — all access control lives in RLS and storage policies, not in React. Never put a service-role key in the frontend.
+
+### Database
+
+Migrations live in `supabase/migrations/`. Apply the initial schema (tables, `CHECK` constraints, RLS, storage policies) via `supabase db push` or the Supabase SQL editor. The `product-images` Storage bucket must be created as **public** before the storage policies will apply.
+
+## Scripts
+
+| Command             | Purpose                      |
+| ------------------- | ---------------------------- |
+| `npm run dev`       | Vite dev server              |
+| `npm run build`     | typecheck + production build |
+| `npm run typecheck` | `tsc --noEmit`               |
+| `npm run lint`      | ESLint (flat config)         |
+| `npm run format`    | Prettier                     |
+
+## Project docs
+
+- **`SPEC.md`** — what to build: schema, RLS, features, acceptance criteria (authoritative for behavior).
+- **`design.md`** — how it looks: tokens, type scale, components (authoritative for UI).
+- **`CLAUDE.md`** — operating rules and workflow for working in this repo.
