@@ -32,7 +32,7 @@ type ProductFormValues = Omit<z.input<typeof singleSchema>, 'product_type'> & {
   product_type: 'single' | 'sealed'
 }
 
-const GRADING_COMPANIES = ['PSA', 'CGC', 'BGS', 'SGC'] as const
+const GRADING_COMPANIES = ['PSA', 'CGC', 'BGS', 'SGC', 'TAG' ] as const
 
 const emptyToUndefined = (v: unknown) => (v === '' || v == null ? undefined : v)
 
