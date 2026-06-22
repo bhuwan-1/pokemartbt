@@ -25,6 +25,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { getPublicImageUrl } from '@/lib/supabase'
 import { cn, formatPrice } from '@/lib/utils'
+import { discountedPrice, isOnSale } from '@/lib/pricing'
 import {
   ADMIN_PAGE_SIZE,
   useAdminProducts,
@@ -274,12 +275,30 @@ export function InventoryPage() {
                       Hidden
                     </Badge>
                   )}
+                  {isOnSale(p) && (
+                    <Badge className="bg-gold text-label-bold uppercase text-on-gold hover:bg-gold">
+                      {Math.round(p.discount_percent)}% Off
+                    </Badge>
+                  )}
                 </div>
               </div>
 
-              <p className="w-28 text-right text-body-md font-extrabold text-foreground">
-                {formatPrice(p.price, p.currency)}
-              </p>
+              <div className="w-28 text-right">
+                {isOnSale(p) ? (
+                  <>
+                    <p className="text-body-md font-extrabold text-foreground">
+                      {formatPrice(discountedPrice(p.price, p.discount_percent), p.currency)}
+                    </p>
+                    <p className="text-body-sm text-on-surface-variant line-through">
+                      {formatPrice(p.price, p.currency)}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-body-md font-extrabold text-foreground">
+                    {formatPrice(p.price, p.currency)}
+                  </p>
+                )}
+              </div>
 
               <div className="flex items-center gap-1.5">
                 <span className="text-body-sm text-on-surface-variant">Qty</span>

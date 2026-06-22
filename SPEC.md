@@ -63,28 +63,29 @@ Read this section before writing policies. Getting it wrong means anyone can wip
 
 Single table `products`. A `product_type` discriminator distinguishes individual cards from sealed product; card attributes are real, filterable/sortable columns — not buried in a description blob.
 
-| Column            | Type                             | Notes                                                                 |
-| ----------------- | -------------------------------- | --------------------------------------------------------------------- |
-| `id`              | uuid PK                          | `gen_random_uuid()`                                                   |
-| `product_type`    | text, not null                   | enum: `single`, `sealed`. UI labels: "Individual Card" / "Sealed Set" |
-| `name`            | text, not null                   | e.g. "Charizard GX — Hidden Fates SV49/SV94"                          |
-| `set_name`        | text                             | expansion, e.g. "Brilliant Stars", "Obsidian Flames"                  |
-| `card_number`     | text                             | singles only, e.g. "4/102"                                            |
-| `rarity`          | text                             | singles only, e.g. "Common", "Holo Rare"                              |
-| `language`        | text, not null, default `'EN'`   |                                                                       |
-| `condition`       | text, not null                   | enum: `NM`,`LP`,`MP`,`HP`,`DMG` (singles) or `SEALED` (sealed)        |
-| `is_graded`       | bool, not null, default `false`  | singles only                                                          |
-| `grading_company` | text                             | enum: `PSA`,`CGC`,`BGS`,`SGC` (null unless graded)                    |
-| `grade`           | numeric(3,1)                     | 1–10 (null unless graded)                                             |
-| `price`           | numeric(10,2), not null          | `>= 0`                                                                |
-| `currency`        | text, not null, default `'USD'`  | store-wide; see Open Decisions                                        |
-| `quantity`        | int, not null, default `1`       | `>= 0`; singles usually 1, sealed often >1                            |
-| `is_active`       | bool, not null, default `true`   | master visibility switch                                              |
-| `is_featured`     | bool, not null, default `false`  | surfaced in the home-page Featured Collections bento (migration 0002) |
-| `image_paths`     | text[], not null, default `'{}'` | ordered storage object paths; **index 0 = cover**                     |
-| `description`     | text                             | freeform notes                                                        |
-| `created_at`      | timestamptz, not null            | `now()`                                                               |
-| `updated_at`      | timestamptz, not null            | maintained by trigger                                                 |
+| Column             | Type                                | Notes                                                                                 |
+| ------------------ | ----------------------------------- | ------------------------------------------------------------------------------------- |
+| `id`               | uuid PK                             | `gen_random_uuid()`                                                                   |
+| `product_type`     | text, not null                      | enum: `single`, `sealed`. UI labels: "Individual Card" / "Sealed Set"                 |
+| `name`             | text, not null                      | e.g. "Charizard GX — Hidden Fates SV49/SV94"                                          |
+| `set_name`         | text                                | expansion, e.g. "Brilliant Stars", "Obsidian Flames"                                  |
+| `card_number`      | text                                | singles only, e.g. "4/102"                                                            |
+| `rarity`           | text                                | singles only, e.g. "Common", "Holo Rare"                                              |
+| `language`         | text, not null, default `'EN'`      |                                                                                       |
+| `condition`        | text, not null                      | enum: `NM`,`LP`,`MP`,`HP`,`DMG` (singles) or `SEALED` (sealed)                        |
+| `is_graded`        | bool, not null, default `false`     | singles only                                                                          |
+| `grading_company`  | text                                | enum: `PSA`,`CGC`,`BGS`,`SGC` (null unless graded)                                    |
+| `grade`            | numeric(3,1)                        | 1–10 (null unless graded)                                                             |
+| `price`            | numeric(10,2), not null             | `>= 0`. The original/list price — never overwritten by a sale                         |
+| `discount_percent` | numeric(5,2), not null, default `0` | `0–100`. On sale when `> 0`; discounted price is derived client-side (migration 0003) |
+| `currency`         | text, not null, default `'USD'`     | store-wide; see Open Decisions                                                        |
+| `quantity`         | int, not null, default `1`          | `>= 0`; singles usually 1, sealed often >1                                            |
+| `is_active`        | bool, not null, default `true`      | master visibility switch                                                              |
+| `is_featured`      | bool, not null, default `false`     | surfaced in the home-page Featured Collections bento (migration 0002)                 |
+| `image_paths`      | text[], not null, default `'{}'`    | ordered storage object paths; **index 0 = cover**                                     |
+| `description`      | text                                | freeform notes                                                                        |
+| `created_at`       | timestamptz, not null               | `now()`                                                                               |
+| `updated_at`       | timestamptz, not null               | maintained by trigger                                                                 |
 
 **Type coherence (enforced at DB level, see §7):**
 
@@ -111,6 +112,7 @@ create table public.products (
   grading_company text check (grading_company in ('PSA','CGC','BGS','SGC')),
   grade           numeric(3,1) check (grade >= 1 and grade <= 10),
   price           numeric(10,2) not null check (price >= 0),
+  discount_percent numeric(5,2) not null default 0 check (discount_percent >= 0 and discount_percent <= 100),
   currency        text not null default 'USD',
   quantity        integer not null default 1 check (quantity >= 0),
   is_active       boolean not null default true,
@@ -358,7 +360,7 @@ Mirrors the "Create New Product" mockup. Single form, two-column on desktop.
   - `single` → show `card_number`, `rarity`, condition pills (NM/LP/MP/HP/D → stored as `DMG`), and a **Graded** toggle that reveals `grading_company` + `grade`.
   - `sealed` → hide rarity/grading/condition; `condition` is set to `SEALED` and `is_graded=false` on submit.
 - **General:** `name` (title), `description`.
-- **Pricing & stock:** `price`, `quantity`.
+- **Pricing & stock:** `price`, `quantity`, `discount_percent` (0–100; > 0 marks the product on sale). The form shows a live discounted-price preview. The stored `price` is the original; the discounted price is derived at render via `lib/pricing.ts` (`effectivePrice` / `discountedPrice`) — the cart stores the discounted unit price so WhatsApp totals match.
 - **Metadata:** `set_name`; (singles) `rarity`, `condition`.
 - Actions: **Publish Product** (create) / **Save** (edit), **Cancel**. Toggle `is_active` and edit `quantity` from the list or the edit form.
 - Confirm before delete. **Deleting a product also deletes all its storage objects** (iterate `image_paths`).
@@ -387,6 +389,7 @@ const baseFields = {
   set_name: z.string().trim().optional().nullable(),
   language: z.string().default('EN'),
   price: z.coerce.number().nonnegative('Price must be ≥ 0'),
+  discount_percent: z.coerce.number().min(0).max(100).default(0),
   currency: z.string().default('USD'),
   quantity: z.coerce.number().int().nonnegative().default(1),
   is_active: z.boolean().default(true),

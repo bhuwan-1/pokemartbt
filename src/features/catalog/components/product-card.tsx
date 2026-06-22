@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { getPublicImageUrl } from '@/lib/supabase'
 import { cn, formatPrice } from '@/lib/utils'
+import { discountedPrice, isOnSale } from '@/lib/pricing'
 import type { ProductRow } from '@/types/product'
 
 // Stock status uses on-brand tokens: whatsapp-green (in stock), gold (low), error-red (out).
@@ -15,6 +16,8 @@ export function ProductCard({ product }: { product: ProductRow }) {
   const cover = product.image_paths[0]
   const status = stockStatus(product.quantity)
   const subtitle = product.card_number ?? product.set_name ?? null
+  const onSale = isOnSale(product)
+  const salePrice = discountedPrice(product.price, product.discount_percent)
 
   return (
     <Link
@@ -34,6 +37,13 @@ export function ProductCard({ product }: { product: ProductRow }) {
           <span className="material-symbols-outlined text-[48px] text-on-surface-variant/30">
             playing_cards
           </span>
+        )}
+        {onSale && (
+          <div className="absolute top-3 left-3">
+            <Badge className="bg-gold text-label-bold uppercase text-on-gold hover:bg-gold">
+              {Math.round(product.discount_percent)}% Off
+            </Badge>
+          </div>
         )}
         <div className="absolute top-3 right-3">
           {product.is_graded ? (
@@ -56,9 +66,20 @@ export function ProductCard({ product }: { product: ProductRow }) {
           </p>
         )}
         <h3 className="line-clamp-2 text-body-md font-bold text-on-surface">{product.name}</h3>
-        <p className="text-body-lg font-extrabold text-primary">
-          {formatPrice(product.price, product.currency)}
-        </p>
+        {onSale ? (
+          <div className="flex items-baseline gap-2">
+            <p className="text-body-lg font-extrabold text-primary">
+              {formatPrice(salePrice, product.currency)}
+            </p>
+            <p className="text-body-sm font-bold text-on-surface-variant line-through">
+              {formatPrice(product.price, product.currency)}
+            </p>
+          </div>
+        ) : (
+          <p className="text-body-lg font-extrabold text-primary">
+            {formatPrice(product.price, product.currency)}
+          </p>
+        )}
         <div className="mt-0.5 flex items-center gap-1.5">
           <span className={cn('size-2 rounded-full', status.dot)} />
           <span className="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">

@@ -9,6 +9,11 @@ const baseFields = {
   set_name: z.string().trim().optional().nullable(),
   language: z.string().default('EN'),
   price: z.coerce.number().nonnegative('Price must be ≥ 0'),
+  discount_percent: z.coerce
+    .number()
+    .min(0, 'Discount must be ≥ 0')
+    .max(100, 'Discount can be at most 100%')
+    .default(0),
   currency: z.string().default(STORE_CURRENCY),
   quantity: z.coerce.number().int().nonnegative().default(1),
   is_active: z.boolean().default(true),

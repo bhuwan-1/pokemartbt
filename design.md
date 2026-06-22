@@ -122,7 +122,9 @@ Reusable as plain CSS utilities (carried over from the mockup — they're good):
 
 ### Badges / pills
 
-Rounded-`full`, `label-bold` uppercase. Variants: red (`primary-container` bg / white) for status ("Expansion Pack Live"); gold (`secondary` bg / `on-secondary`) for tier ("Legendary").
+Rounded-`full`, `label-bold` uppercase. Variants: red (`primary-container` bg / white) for status ("Expansion Pack Live"); gold (`secondary` bg / `on-secondary`) for tier ("Legendary") **and for the sale/discount badge** ("X% OFF" / "Save X%"), so it reads as a highlight and stays distinct from the red condition badge.
+
+**On-sale price treatment:** when `discount_percent > 0`, show the discounted price in the usual price style (`primary` / `price-display`) with the original price beside it, smaller and `line-through` in `on-surface-variant`. The gold discount badge sits top-left on the card pedestal (condition/grade badge stays top-right).
 
 ### Product card (catalog tile)
 

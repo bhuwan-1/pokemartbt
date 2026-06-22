@@ -10,6 +10,7 @@ type ProductPayload = {
   set_name: string | null
   language: string
   price: number
+  discount_percent: number
   currency: string
   quantity: number
   is_active: boolean
@@ -33,6 +34,7 @@ export function toProductPayload(input: ProductInput, imagePaths: string[]): Pro
     set_name: input.set_name || null,
     language: input.language,
     price: input.price,
+    discount_percent: input.discount_percent,
     currency: input.currency,
     quantity: input.quantity,
     is_active: input.is_active,

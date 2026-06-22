@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatPrice } from '@/lib/utils'
+import { discountedPrice, isOnSale } from '@/lib/pricing'
 import { useProduct } from '@/features/catalog/hooks/use-product'
 import { ProductGallery } from '@/features/catalog/components/product-gallery'
 import { useCart } from '@/features/cart/use-cart'
@@ -27,7 +28,7 @@ function singleItemLink(product: ProductRow) {
       set_name: product.set_name,
       condition: product.condition,
       grade: product.grade,
-      price: product.price,
+      price: discountedPrice(product.price, product.discount_percent),
       currency: product.currency,
       qty: 1,
     },
@@ -68,6 +69,8 @@ export function ProductDetailPage() {
   }
 
   const isSingle = product.product_type === 'single'
+  const onSale = isOnSale(product)
+  const salePrice = discountedPrice(product.price, product.discount_percent)
   const soldOut = product.quantity === 0
   const inCart = items.find((i) => i.id === product.id)?.qty ?? 0
   const atMax = !soldOut && inCart >= product.quantity
@@ -109,9 +112,25 @@ export function ProductDetailPage() {
             </div>
           </div>
 
-          <p className="text-price-display text-foreground">
-            {formatPrice(product.price, product.currency)}
-          </p>
+          {onSale ? (
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-baseline gap-3">
+                <p className="text-price-display text-foreground">
+                  {formatPrice(salePrice, product.currency)}
+                </p>
+                <p className="text-headline-md text-on-surface-variant line-through">
+                  {formatPrice(product.price, product.currency)}
+                </p>
+              </div>
+              <Badge className="bg-gold text-label-bold uppercase text-on-gold hover:bg-gold">
+                Save {Math.round(product.discount_percent)}%
+              </Badge>
+            </div>
+          ) : (
+            <p className="text-price-display text-foreground">
+              {formatPrice(product.price, product.currency)}
+            </p>
+          )}
 
           <div className="flex flex-col gap-3 sm:flex-row">
             {soldOut ? (

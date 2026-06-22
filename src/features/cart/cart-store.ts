@@ -1,4 +1,5 @@
 import type { ProductRow } from '@/types/product'
+import { effectivePrice } from '@/lib/pricing'
 
 // Client-only cart: lives entirely in localStorage by design (SPEC §10.3).
 // No server persistence — the order itself happens in WhatsApp.
@@ -76,7 +77,9 @@ export function addToCart(product: ProductRow, qty = 1) {
       set_name: product.set_name,
       condition: product.condition,
       grade: product.grade,
-      price: product.price,
+      // Store the discounted unit price so cart totals and the WhatsApp message
+      // reflect what the customer actually pays.
+      price: effectivePrice(product),
       currency: product.currency,
       qty: Math.min(qty, product.quantity),
       maxQty: product.quantity,

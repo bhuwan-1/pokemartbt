@@ -15,6 +15,7 @@ export const productRowSchema = z.object({
   grading_company: z.enum(['PSA', 'CGC', 'BGS', 'SGC']).nullable(),
   grade: z.number().nullable(),
   price: z.number(),
+  discount_percent: z.number(),
   currency: z.string(),
   quantity: z.number().int(),
   is_active: z.boolean(),

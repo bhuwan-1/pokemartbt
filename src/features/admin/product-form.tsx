@@ -18,6 +18,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { STORE_CURRENCY } from '@/lib/config'
+import { formatPrice } from '@/lib/utils'
+import { discountedPrice } from '@/lib/pricing'
 import { productSchema, singleSchema, type ProductInput } from '@/schemas/product-schema'
 import { useProduct } from '@/features/catalog/hooks/use-product'
 import { useProductMutations } from '@/features/admin/hooks/use-product-mutations'
@@ -42,6 +44,7 @@ const CREATE_DEFAULTS: ProductFormValues = {
   set_name: '',
   language: 'EN',
   price: undefined,
+  discount_percent: 0,
   currency: STORE_CURRENCY,
   quantity: 1,
   is_active: true,
@@ -62,6 +65,7 @@ function rowToFormValues(row: ProductRow): ProductFormValues {
     set_name: row.set_name ?? '',
     language: row.language,
     price: row.price,
+    discount_percent: row.discount_percent,
     currency: row.currency,
     quantity: row.quantity,
     is_active: row.is_active,
@@ -129,6 +133,9 @@ export function ProductFormPage() {
   const gradingCompany = watch('grading_company')
   const isActive = watch('is_active')
   const isFeatured = watch('is_featured')
+  const priceValue = Number(watch('price')) || 0
+  const discountValue = Number(watch('discount_percent')) || 0
+  const showSalePreview = priceValue > 0 && discountValue > 0 && discountValue <= 100
   const isSingle = productType === 'single'
   const saving = createProduct.isPending || updateProduct.isPending
 
@@ -320,7 +327,32 @@ export function ProductFormPage() {
                 />
                 <FieldError message={errors.quantity?.message as string | undefined} />
               </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="discount_percent">Discount (%)</Label>
+                <Input
+                  id="discount_percent"
+                  type="number"
+                  step="1"
+                  min={0}
+                  max={100}
+                  placeholder="0"
+                  {...register('discount_percent', { setValueAs: emptyToUndefined })}
+                />
+                <FieldError message={errors.discount_percent?.message as string | undefined} />
+                <p className="text-body-sm text-on-surface-variant">
+                  Leave at 0 for no sale. Customers see the discounted price.
+                </p>
+              </div>
             </div>
+            {showSalePreview && (
+              <p className="text-body-sm text-on-surface-variant">
+                On sale:{' '}
+                <span className="font-bold text-primary">
+                  {formatPrice(discountedPrice(priceValue, discountValue), STORE_CURRENCY)}
+                </span>{' '}
+                <span className="line-through">{formatPrice(priceValue, STORE_CURRENCY)}</span>
+              </p>
+            )}
           </Panel>
         </div>
 
