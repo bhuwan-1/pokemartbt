@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { STORE_CURRENCY } from '@/lib/config'
 
-const conditionSingle = z.enum(['NM', 'LP', 'MP', 'HP', 'DMG'])
+const conditionSingle = z.enum(['GM', 'M', 'NM', 'LP', 'MP', 'HP', 'DMG'])
 const gradingCompany = z.enum(['PSA', 'CGC', 'BGS', 'SGC', 'TAG'])
 
 const baseFields = {

@@ -141,7 +141,7 @@ Driven by `is_featured` products. **Text never overlays the card art** — Poké
 - **Type selector (radio-cards):** two large clickable cards side by side, each with a Material icon, bold title, and one-line description. **Selected state:** highlighted border + a **gold (`secondary`) filled radio dot**; unselected shows a hollow outline radio. This is the `product_type` discriminant.
 - **Text input / textarea:** `lg` radius, `outline-variant` border, muted placeholder, **red focus ring** (`focus:ring-primary focus:border-primary`). Textarea ~6 rows, resizable vertically.
 - **Select (e.g. Rarity):** same input styling with a trailing chevron.
-- **Condition pills:** a wrap of rounded-`full` toggle chips — `NM LP MP HP D` — outline by default, **`primary` fill + white when selected** (single-select). (Label "D" maps to stored value `DMG`.) Shown for singles only.
+- **Condition pills:** a wrap of rounded-`full` toggle chips — `GM M NM LP MP HP D` — outline by default, **`primary` fill + white when selected** (single-select). (Label "D" maps to stored value `DMG`.) Shown for singles only.
 - **Graded toggle (singles):** a switch/checkbox that reveals `grading_company` (select) + `grade` (number) when on.
 - **Upload dropzone (Media Assets):** dashed `outline-variant` border, centered upload icon in a tinted red circle, primary text "Click to upload or drag and drop", helper "High-res PNG, JPG or WEBP (Max 10MB)".
 - **Thumbnail row:** ordered thumbnails (first = cover) followed by `+` add-tiles on `surface-low`. Supports reorder and per-thumbnail remove. Backed by `image_paths[]`.

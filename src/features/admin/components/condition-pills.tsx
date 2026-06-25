@@ -2,6 +2,8 @@ import { cn } from '@/lib/utils'
 
 // Label "D" maps to stored value DMG (design.md §6).
 const PILLS = [
+  { label: 'GM', value: 'GM' },
+  { label: 'M', value: 'M' },
   { label: 'NM', value: 'NM' },
   { label: 'LP', value: 'LP' },
   { label: 'MP', value: 'MP' },

@@ -72,9 +72,9 @@ Single table `products`. A `product_type` discriminator distinguishes individual
 | `card_number`      | text                                | singles only, e.g. "4/102"                                                            |
 | `rarity`           | text                                | singles only, e.g. "Common", "Holo Rare"                                              |
 | `language`         | text, not null, default `'EN'`      |                                                                                       |
-| `condition`        | text, not null                      | enum: `NM`,`LP`,`MP`,`HP`,`DMG` (singles) or `SEALED` (sealed)                        |
+| `condition`        | text, not null                      | enum: `GM`,`M`,`NM`,`LP`,`MP`,`HP`,`DMG` (singles) or `SEALED` (sealed)               |
 | `is_graded`        | bool, not null, default `false`     | singles only                                                                          |
-| `grading_company`  | text                                | enum: `PSA`,`CGC`,`BGS`,`SGC` (null unless graded)                                    |
+| `grading_company`  | text                                | enum: `PSA`,`CGC`,`BGS`,`SGC`,`TAG` (null unless graded)                              |
 | `grade`            | numeric(3,1)                        | 1–10 (null unless graded)                                                             |
 | `price`            | numeric(10,2), not null             | `>= 0`. The original/list price — never overwritten by a sale                         |
 | `discount_percent` | numeric(5,2), not null, default `0` | `0–100`. On sale when `> 0`; discounted price is derived client-side (migration 0003) |
@@ -89,7 +89,7 @@ Single table `products`. A `product_type` discriminator distinguishes individual
 
 **Type coherence (enforced at DB level, see §7):**
 
-- `single` → `condition` ∈ {NM,LP,MP,HP,DMG}; may be graded.
+- `single` → `condition` ∈ {GM,M,NM,LP,MP,HP,DMG}; may be graded.
 - `sealed` → `condition` = `SEALED`; never graded; `rarity`/`card_number` left null.
 - Graded singles must carry both `grading_company` and `grade`.
 
@@ -107,9 +107,9 @@ create table public.products (
   card_number     text,
   rarity          text,
   language        text not null default 'EN',
-  condition       text not null check (condition in ('NM','LP','MP','HP','DMG','SEALED')),
+  condition       text not null check (condition in ('GM','M','NM','LP','MP','HP','DMG','SEALED')),
   is_graded       boolean not null default false,
-  grading_company text check (grading_company in ('PSA','CGC','BGS','SGC')),
+  grading_company text check (grading_company in ('PSA','CGC','BGS','SGC','TAG')),
   grade           numeric(3,1) check (grade >= 1 and grade <= 10),
   price           numeric(10,2) not null check (price >= 0),
   discount_percent numeric(5,2) not null default 0 check (discount_percent >= 0 and discount_percent <= 100),
@@ -123,7 +123,7 @@ create table public.products (
 
   -- type coherence (defense in depth; mirrors the Zod discriminated union)
   constraint single_condition_chk check (
-    product_type <> 'single' or condition in ('NM','LP','MP','HP','DMG')
+    product_type <> 'single' or condition in ('GM','M','NM','LP','MP','HP','DMG')
   ),
   constraint sealed_condition_chk check (
     product_type <> 'sealed' or condition = 'SEALED'
@@ -255,7 +255,7 @@ src/
       product-form.tsx             # create + edit (type-aware)
       components/
         product-type-selector.tsx  # "Individual Card" / "Sealed Set" radio-cards
-        condition-pills.tsx        # NM/LP/MP/HP/D toggle group
+        condition-pills.tsx        # GM/M/NM/LP/MP/HP/D toggle group
         image-uploader.tsx         # dropzone + ordered thumbnail row
       hooks/
         use-admin-products.ts      # admin list (sees inactive)
@@ -357,7 +357,7 @@ Mirrors the "Create New Product" mockup. Single form, two-column on desktop.
 
 - **Product classification (top):** two selectable radio-cards — "Individual Card" (`single`) / "Sealed Set" (`sealed`). The selection drives which fields render and which Zod branch validates.
 - **Conditional fields:**
-  - `single` → show `card_number`, `rarity`, condition pills (NM/LP/MP/HP/D → stored as `DMG`), and a **Graded** toggle that reveals `grading_company` + `grade`.
+  - `single` → show `card_number`, `rarity`, condition pills (GM/M/NM/LP/MP/HP/D → stored as `DMG`), and a **Graded** toggle that reveals `grading_company` + `grade`.
   - `sealed` → hide rarity/grading/condition; `condition` is set to `SEALED` and `is_graded=false` on submit.
 - **General:** `name` (title), `description`.
 - **Pricing & stock:** `price`, `quantity`, `discount_percent` (0–100; > 0 marks the product on sale). The form shows a live discounted-price preview. The stored `price` is the original; the discounted price is derived at render via `lib/pricing.ts` (`effectivePrice` / `discountedPrice`) — the cart stores the discounted unit price so WhatsApp totals match.
@@ -381,8 +381,8 @@ Discriminated union on `product_type` — the type selector is the discriminant,
 // schemas/product-schema.ts
 import { z } from 'zod'
 
-const conditionSingle = z.enum(['NM', 'LP', 'MP', 'HP', 'DMG'])
-const gradingCompany = z.enum(['PSA', 'CGC', 'BGS', 'SGC'])
+const conditionSingle = z.enum(['GM', 'M', 'NM', 'LP', 'MP', 'HP', 'DMG'])
+const gradingCompany = z.enum(['PSA', 'CGC', 'BGS', 'SGC', 'TAG'])
 
 const baseFields = {
   name: z.string().min(1, 'Title is required'),

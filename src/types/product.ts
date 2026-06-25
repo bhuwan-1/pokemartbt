@@ -10,7 +10,7 @@ export const productRowSchema = z.object({
   card_number: z.string().nullable(),
   rarity: z.string().nullable(),
   language: z.string(),
-  condition: z.enum(['NM', 'LP', 'MP', 'HP', 'DMG', 'SEALED']),
+  condition: z.enum(['GM', 'M', 'NM', 'LP', 'MP', 'HP', 'DMG', 'SEALED']),
   is_graded: z.boolean(),
   grading_company: z.enum(['PSA', 'CGC', 'BGS', 'SGC', 'TAG']).nullable(),
   grade: z.number().nullable(),
