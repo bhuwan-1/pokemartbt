@@ -8,7 +8,7 @@ const COPY = {
   },
   single: {
     title: 'Single Cards',
-    desc: 'Raw and graded singles, conditions from Near Mint to played — ready to ship.',
+    desc: 'Raw and graded singles, conditions from Gem Mint to Near Mint — ready to ship.',
     tag: 'Singles',
   },
   sealed: {

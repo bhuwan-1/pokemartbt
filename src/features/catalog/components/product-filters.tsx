@@ -18,7 +18,7 @@ const TYPE_TABS = [
   { label: 'Sealed', value: 'sealed' },
 ] as const
 
-const CONDITIONS = ['NM', 'LP', 'MP', 'HP', 'DMG'] as const
+const CONDITIONS = ['GM', 'M', 'NM', 'LP', 'MP', 'HP', 'DMG'] as const
 
 const SORTS: { label: string; value: CatalogSort }[] = [
   { label: 'Newest', value: 'newest' },
